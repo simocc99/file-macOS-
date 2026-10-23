@@ -2,9 +2,9 @@
 import PackageDescription
 
 let package = Package(
-    name: "FileMacOS",
+    name: "Clementine",
     platforms: [.macOS(.v13)],
     targets: [
-        .executableTarget(name: "FileMacOS", path: "Sources/FileMacOS")
+        .executableTarget(name: "Clementine", path: "Sources/Clementine")
     ]
 )
