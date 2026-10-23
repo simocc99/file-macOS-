@@ -139,6 +139,7 @@ final class WheelView: NSView {
     // MARK: Trascinamento
 
     override func draggingEntered(_ sender: NSDraggingInfo) -> NSDragOperation {
+        clemLog.debug("draggingEntered")
         update(sender)
         return .copy
     }
@@ -162,6 +163,7 @@ final class WheelView: NSView {
     }
 
     override func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
+        clemLog.debug("performDragOperation")
         guard let i = index(at: sender.draggingLocation) else { return false }
         let urls = (sender.draggingPasteboard.readObjects(
             forClasses: [NSURL.self],
@@ -178,6 +180,7 @@ final class WheelView: NSView {
     }
 
     override func draggingEnded(_ sender: NSDraggingInfo) {
+        clemLog.debug("draggingEnded busy=\(self.busy)")
         if !busy { onFinished?() }
     }
 }
