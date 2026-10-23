@@ -7,6 +7,8 @@ struct ClementineApp: App {
     var body: some Scene {
         MenuBarExtra("Clementine", systemImage: "circle.hexagongrid.fill") {
             Button("Come si usa…") { Onboarding.show() }
+            Button("Impostazioni…") { SettingsWindow.show() }
+                .keyboardShortcut(",")
             Divider()
             Button("Esci") { NSApp.terminate(nil) }
                 .keyboardShortcut("q")

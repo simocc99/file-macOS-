@@ -34,7 +34,9 @@ final class WheelPanel: NSPanel {
             origin.y = min(max(origin.y, f.minY), f.maxY - Self.side)
         }
         setFrameOrigin(origin)
+        alphaValue = 0
         orderFrontRegardless()
+        NSAnimationContext.runAnimationGroup { $0.duration = 0.12; animator().alphaValue = 1 }
     }
 
     func dismiss() {

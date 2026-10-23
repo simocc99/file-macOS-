@@ -41,8 +41,8 @@ final class DragMonitor {
         guard !panel.isVisible else { return }
         clemLog.debug("dragged flags=\(flags.rawValue)")
         let mode: WheelMode
-        if flags.contains(.shift) { mode = .convert }
-        else if flags.contains(.option) { mode = .tools }
+        if flags.contains(.shift), Prefs.bool("shiftEnabled") { mode = .convert }
+        else if flags.contains(.option), Prefs.bool("optionEnabled") { mode = .tools }
         else { return }
 
         let pasteboard = NSPasteboard(name: .drag)

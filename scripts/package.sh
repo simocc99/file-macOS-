@@ -8,7 +8,7 @@ BIN="$(swift build -c release --arch arm64 --arch x86_64 --show-bin-path)/Clemen
 
 APP="dist/Clementine.app"
 rm -rf dist
-mkdir -p "$APP/Contents/MacOS"
+mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp "$BIN" "$APP/Contents/MacOS/Clementine"
 cat > "$APP/Contents/Info.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
@@ -17,6 +17,7 @@ cat > "$APP/Contents/Info.plist" <<PLIST
   <key>CFBundleName</key><string>Clementine</string>
   <key>CFBundleDisplayName</key><string>Clementine</string>
   <key>CFBundleIdentifier</key><string>com.simocc99.clementine</string>
+  <key>CFBundleIconFile</key><string>Clementine</string>
   <key>CFBundleExecutable</key><string>Clementine</string>
   <key>CFBundlePackageType</key><string>APPL</string>
   <key>CFBundleShortVersionString</key><string>0.1.0</string>
@@ -26,6 +27,12 @@ cat > "$APP/Contents/Info.plist" <<PLIST
   <key>NSHighResolutionCapable</key><true/>
 </dict></plist>
 PLIST
+ICONSET="$(mktemp -d)/Clementine.iconset"
+if swift scripts/make-icon.swift "$ICONSET" && iconutil -c icns "$ICONSET" -o "$APP/Contents/Resources/Clementine.icns"; then
+  echo "Icona creata"
+else
+  echo "Icona non creata (continuo senza)"
+fi
 codesign --force --deep -s - "$APP"
 (cd dist && zip -qr Clementine.zip Clementine.app)
 echo "Creato dist/Clementine.zip"

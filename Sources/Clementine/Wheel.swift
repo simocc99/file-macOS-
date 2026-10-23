@@ -128,19 +128,38 @@ struct AVFileTypeBox: @unchecked Sendable {
 
 enum Runner {
     static func run(_ action: WheelAction, on urls: [URL]) async {
+        let opensWindow = ["edit", "addbg"].contains(action.id)
+        var done: [URL] = []
         for url in urls {
+            if !opensWindow {
+                await MainActor.run {
+                    Toast.shared.show("\(action.title)… \(url.lastPathComponent)", symbol: "hourglass", duration: nil)
+                }
+            }
             do {
                 try await action.run(url)
-                NSSound(named: "Glass")?.play()
+                done.append(url)
             } catch {
-                NSSound(named: "Basso")?.play()
+                if Prefs.bool("soundEnabled") { NSSound(named: "Basso")?.play() }
                 await MainActor.run {
+                    Toast.shared.hide()
                     let alert = NSAlert()
                     alert.messageText = "Operazione non riuscita"
                     alert.informativeText = "\(url.lastPathComponent): \(error.localizedDescription)"
                     alert.runModal()
                 }
             }
+        }
+        guard !opensWindow else { return }
+        if let first = done.first {
+            if Prefs.bool("soundEnabled") { NSSound(named: "Glass")?.play() }
+            let name = done.count > 1 ? "\(done.count) file" : first.lastPathComponent
+            await MainActor.run {
+                Toast.shared.show("Fatto · \(name) — clic per mostrare", symbol: "checkmark.circle.fill",
+                                  tint: .systemGreen, reveal: first.deletingLastPathComponent())
+            }
+        } else {
+            await MainActor.run { Toast.shared.hide() }
         }
     }
 }

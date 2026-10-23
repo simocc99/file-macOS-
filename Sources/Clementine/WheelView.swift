@@ -37,18 +37,31 @@ final class WheelView: NSView {
         guard !actions.isEmpty else { return }
 
         let disc = NSBezierPath(ovalIn: bounds.insetBy(dx: bounds.width / 2 - outer - 8, dy: bounds.height / 2 - outer - 8))
-        NSColor(white: 0.1, alpha: 0.35).setFill()
+        NSGraphicsContext.saveGraphicsState()
+        let shadow = NSShadow()
+        shadow.shadowColor = NSColor(white: 0, alpha: 0.35)
+        shadow.shadowBlurRadius = 8
+        shadow.shadowOffset = NSSize(width: 0, height: -3)
+        shadow.set()
+        NSColor(white: 0.1, alpha: 0.4).setFill()
         disc.fill()
+        NSGraphicsContext.restoreGraphicsState()
 
         for (i, action) in actions.enumerated() {
             let mid = 90 - CGFloat(i) * step
-            let path = wedge(mid: mid)
+            let path = wedge(mid: mid, grow: i == hovered ? 8 : 0)
             if i == hovered {
-                NSColor(calibratedRed: 1.0, green: 0.55, blue: 0.1, alpha: 0.95).setFill()
+                NSGraphicsContext.saveGraphicsState()
+                path.addClip()
+                NSGradient(
+                    starting: NSColor(calibratedRed: 1.0, green: 0.68, blue: 0.2, alpha: 0.98),
+                    ending: NSColor(calibratedRed: 0.97, green: 0.42, blue: 0.05, alpha: 0.98)
+                )?.draw(in: path.bounds, angle: CGFloat(mid) + 180)
+                NSGraphicsContext.restoreGraphicsState()
             } else {
-                NSColor(calibratedRed: 1.0, green: 0.88, blue: 0.7, alpha: 0.82).setFill()
+                NSColor(calibratedRed: 1.0, green: 0.92, blue: 0.8, alpha: 0.86).setFill()
+                path.fill()
             }
-            path.fill()
             NSColor(white: 1, alpha: 0.5).setStroke()
             path.lineWidth = 1
             path.stroke()
@@ -61,7 +74,8 @@ final class WheelView: NSView {
         drawCenter()
     }
 
-    private func wedge(mid: CGFloat) -> NSBezierPath {
+    private func wedge(mid: CGFloat, grow: CGFloat = 0) -> NSBezierPath {
+        let outer = self.outer + grow
         let start = mid + step / 2 - gap
         let end = mid - step / 2 + gap
         func point(_ r: CGFloat, _ deg: CGFloat) -> NSPoint {
