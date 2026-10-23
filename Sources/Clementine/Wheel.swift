@@ -81,6 +81,7 @@ enum Wheel {
                 video("mp4", "MP4", .init(.mp4), preset: AVAssetExportPresetHighestQuality),
                 video("mov", "MOV", .init(.mov), preset: AVAssetExportPresetHighestQuality),
                 video("m4a", "Audio", .init(.m4a), preset: AVAssetExportPresetAppleM4A),
+                WheelAction(id: "gif", title: "GIF", symbol: "photo.stack") { _ = try await Converters.videoToGIF($0) },
             ]
         case .text:
             return [
@@ -108,10 +109,32 @@ enum Wheel {
         let addBG = WheelAction(id: "addbg", title: "Sfondo", symbol: "photo.artframe") { url in
             await MainActor.run { Editors.addBackground(url) }
         }
+        let ratio = WheelAction(id: "ratio", title: "16:9", symbol: "rectangle.ratio.16.to.9") {
+            _ = try Converters.cropRatio($0, width: 16, height: 9)
+        }
+        let rotate = WheelAction(id: "rotate", title: "Ruota", symbol: "rotate.right") {
+            _ = try Converters.rotateImage($0, clockwise: true)
+        }
+        let flip = WheelAction(id: "flip", title: "Specchia", symbol: "arrow.left.and.right.righttriangle.left.righttriangle.right") {
+            _ = try Converters.flipImage($0)
+        }
+        let resize = WheelAction(id: "resize", title: "50%", symbol: "arrow.down.right.and.arrow.up.left.circle") {
+            _ = try Converters.resizeImage($0, scale: 0.5)
+        }
+        let gray = WheelAction(id: "gray", title: "B/N", symbol: "circle.lefthalf.filled") {
+            _ = try Converters.grayscaleImage($0)
+        }
+        let rotatePDF = WheelAction(id: "rotatepdf", title: "Ruota", symbol: "rotate.right") {
+            _ = try Converters.rotatePDF($0)
+        }
+        let mute = WheelAction(id: "mute", title: "Muto", symbol: "speaker.slash") {
+            _ = try await Converters.muteVideo($0)
+        }
         switch kind {
-        case .image: return [compress, metadata, crop, edit, addBG]
-        case .pdf: return [compress, metadata, edit]
-        case .audio, .video: return [compress, edit]
+        case .image: return [compress, metadata, crop, ratio, rotate, flip, resize, gray, edit, addBG]
+        case .pdf: return [compress, metadata, rotatePDF, edit]
+        case .audio: return [compress, edit]
+        case .video: return [compress, mute, edit]
         case .text: return [edit]
         case .other: return []
         }
